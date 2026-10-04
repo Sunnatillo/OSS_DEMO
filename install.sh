@@ -21,8 +21,10 @@ SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKIP_KIND="false"
 [[ "${1:-}" == "--skip-kind" ]] && SKIP_KIND="true"
 
-# Cloud providers removed from Management when TRIM_PROVIDERS=true.
-TRIM_DENYLIST='["cluster-api-provider-aws","cluster-api-provider-azure","cluster-api-provider-gcp","cluster-api-provider-docker","cluster-api-provider-kubevirt","cluster-api-provider-openstack","cluster-api-provider-vsphere","cluster-api-provider-infoblox"]'
+# Cloud and unused IPAM providers removed from Management when TRIM_PROVIDERS=true.
+# cluster-api-provider-ipam is CAPI in-cluster IPAM; we use ipam.metal3.io instead.
+# Deliberately keeps cluster-api-provider-k0sproject-k0smotron and projectsveltos (KCM machinery).
+TRIM_DENYLIST='["cluster-api-provider-aws","cluster-api-provider-azure","cluster-api-provider-gcp","cluster-api-provider-docker","cluster-api-provider-kubevirt","cluster-api-provider-openstack","cluster-api-provider-vsphere","cluster-api-provider-infoblox","cluster-api-provider-ipam"]'
 
 ensure_kind() {
   [[ "${SKIP_KIND}" == "true" ]] && return 0
