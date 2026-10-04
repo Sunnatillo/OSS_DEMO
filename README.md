@@ -95,6 +95,7 @@ k0rdent/
 ├── AGENT_HANDOVER.md                 # handover doc for continuing in a new repo
 ├── config.env                        # all site-specific values (edit before a lab run)
 ├── install.sh                        # orchestrator (kind → KCM → templates → BMO/Ironic)
+├── clean.sh                          # scoped teardown (this lab's cluster/networks only)
 ├── charts/
 │   ├── capm3-standalone-cp/          # ClusterTemplate chart (Metal3 + kubeadm cluster)
 │   │   ├── Chart.yaml                #   declares providers via cluster.x-k8s.io/provider annotation

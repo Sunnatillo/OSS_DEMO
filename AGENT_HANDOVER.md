@@ -243,8 +243,9 @@ EOF
 ## 11. Teardown
 
 ```bash
-kind delete cluster --name <cluster>          # dev
-host-setup/clean.sh                           # lab: bridges, veth, docker nets, registry/httpd containers
+kind delete cluster --name metal3-mgmt        # dev (cluster only)
+./clean.sh                                     # scoped: this lab's cluster + docker nets + bridges/veth + its iptables rules
+host-setup/clean.sh                            # legacy BML teardown (host-wide: also stops ALL containers, minikube, libvirt)
 # or KCM only:
 kubectl delete management.k0rdent kcm ; helm uninstall kcm -n kcm-system
 ```
