@@ -15,7 +15,7 @@ metadata:
   name: test1
   namespace: kcm-system
 spec:
-  template: capm3-standalone-cp-0-1-0
+  template: capm3-standalone-cp-0-1-1
   credential: capm3-stub-credential
   dryRun: false
   config:

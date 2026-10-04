@@ -60,7 +60,7 @@ publish_charts() {
   helm package "${SCRIPTDIR}/charts/capm3-provider" \
     "${SCRIPTDIR}/charts/capm3-standalone-cp" -d "${out}"
   helm push "${out}/capm3-provider-0.1.0.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
-  helm push "${out}/capm3-standalone-cp-0.1.0.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
+  helm push "${out}/capm3-standalone-cp-0.1.1.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
 }
 
 register_templates() {

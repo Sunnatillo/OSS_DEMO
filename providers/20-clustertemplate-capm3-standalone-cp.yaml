@@ -3,13 +3,13 @@
 apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterTemplate
 metadata:
-  name: capm3-standalone-cp-0-1-0
+  name: capm3-standalone-cp-0-1-1
   namespace: kcm-system
 spec:
   helm:
     chartSpec:
       chart: capm3-standalone-cp
-      version: 0.1.0
+      version: 0.1.1
       interval: 10m0s
       sourceRef:
         kind: HelmRepository
