@@ -1,0 +1,18 @@
+# Registers the Metal3 (+ kubeadm) providers with k0rdent. Cluster-scoped, so it
+# lives in the system namespace implicitly; the referenced HelmRepository is in
+# kcm-system.
+apiVersion: k0rdent.mirantis.com/v1beta1
+kind: ProviderTemplate
+metadata:
+  name: cluster-api-provider-metal3-0-1-0
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  helm:
+    chartSpec:
+      chart: capm3-provider
+      version: 0.1.0
+      interval: 10m0s
+      sourceRef:
+        kind: HelmRepository
+        name: k0rdent-byo-metal3

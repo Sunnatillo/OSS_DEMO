@@ -1,0 +1,15 @@
+# k0rdent's ClusterDeployment webhook requires a ProviderInterface for the
+# infrastructure provider, and it must advertise a ClusterIdentity kind that
+# matches the Credential. CAPM3 uses no cloud identity, so we advertise the
+# plain Secret kind used by the stub Credential (see k0rdent/deploy/credential.yaml).
+# Shipping this via the chart gives it the Helm labels KCM's cached client needs.
+apiVersion: k0rdent.mirantis.com/v1beta1
+kind: ProviderInterface
+metadata:
+  name: cluster-api-provider-metal3
+  labels:
+    cluster.x-k8s.io/provider: infrastructure-metal3
+spec:
+  description: Metal3 infrastructure provider for Cluster API
+  clusterIdentityKinds:
+  - Secret

@@ -1,0 +1,16 @@
+# Registers the Metal3 standalone-CP ClusterTemplate with k0rdent. Must live in
+# the same namespace as the ClusterDeployment that references it (kcm-system here).
+apiVersion: k0rdent.mirantis.com/v1beta1
+kind: ClusterTemplate
+metadata:
+  name: capm3-standalone-cp-0-1-0
+  namespace: kcm-system
+spec:
+  helm:
+    chartSpec:
+      chart: capm3-standalone-cp
+      version: 0.1.0
+      interval: 10m0s
+      sourceRef:
+        kind: HelmRepository
+        name: k0rdent-byo-metal3

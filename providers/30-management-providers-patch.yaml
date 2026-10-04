@@ -1,0 +1,11 @@
+# The Management object already exists (created by the KCM Helm release). Merge
+# the provider entry below into its spec.providers list, e.g.:
+#   kubectl edit management.k0rdent.mirantis.com kcm
+#
+# This single ProviderTemplate installs infrastructure-metal3, ipam-metal3 and
+# the kubeadm bootstrap/control-plane providers (see capm3-provider chart).
+#
+# spec:
+#   providers:
+#   - name: cluster-api-provider-metal3
+#     template: cluster-api-provider-metal3-0-1-0

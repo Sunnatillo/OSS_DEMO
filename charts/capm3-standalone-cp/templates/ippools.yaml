@@ -1,0 +1,26 @@
+apiVersion: ipam.metal3.io/v1alpha1
+kind: IPPool
+metadata:
+  name: provisioning-pool
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  clusterName: {{ include "capm3.clusterName" . }}
+  namePrefix: {{ include "capm3.clusterName" . }}-prov
+  pools:
+  - start: {{ .Values.ipPools.provisioning.start | quote }}
+    end: {{ .Values.ipPools.provisioning.end | quote }}
+  prefix: {{ .Values.ipPools.provisioning.prefix }}
+---
+apiVersion: ipam.metal3.io/v1alpha1
+kind: IPPool
+metadata:
+  name: externalv4-pool
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  clusterName: {{ include "capm3.clusterName" . }}
+  namePrefix: {{ include "capm3.clusterName" . }}-bmv4
+  gateway: {{ .Values.ipPools.external.gateway | quote }}
+  pools:
+  - start: {{ .Values.ipPools.external.start | quote }}
+    end: {{ .Values.ipPools.external.end | quote }}
+  prefix: {{ .Values.ipPools.external.prefix }}

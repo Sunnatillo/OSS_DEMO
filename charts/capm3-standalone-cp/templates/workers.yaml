@@ -1,0 +1,232 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachineDeployment
+metadata:
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ include "capm3.clusterName" . }}
+    nodepool: nodepool-0
+  name: {{ include "capm3.clusterName" . }}
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  clusterName: {{ include "capm3.clusterName" . }}
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ include "capm3.clusterName" . }}
+      nodepool: nodepool-0
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: {{ include "capm3.clusterName" . }}
+        nodepool: nodepool-0
+    spec:
+      bootstrap:
+        configRef:
+          apiGroup: bootstrap.cluster.x-k8s.io
+          kind: KubeadmConfigTemplate
+          name: {{ include "capm3.clusterName" . }}-workers
+      clusterName: {{ include "capm3.clusterName" . }}
+      deletion:
+        nodeDrainTimeoutSeconds: 0
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: Metal3MachineTemplate
+        name: {{ include "capm3.clusterName" . }}-workers
+      version: {{ .Values.k8sVersion }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: Metal3MachineTemplate
+metadata:
+  name: {{ include "capm3.clusterName" . }}-workers
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  template:
+    spec:
+      hostSelector:
+        matchLabels:
+      dataTemplate:
+        name: {{ include "capm3.clusterName" . }}-workers-template
+      image:
+        checksum: {{ include "capm3.imageChecksumURL" . | quote }}
+        checksumType: {{ .Values.image.checksumType }}
+        diskFormat: {{ .Values.image.diskFormat }}
+        url: {{ include "capm3.imageURL" . | quote }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: Metal3DataTemplate
+metadata:
+  name: {{ include "capm3.clusterName" . }}-workers-template
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  clusterName: {{ include "capm3.clusterName" . }}
+  metaData:
+    ipAddressesFromPool:
+    - key: provisioningIP
+      name: provisioning-pool
+      apiGroup: "ipam.metal3.io"
+      kind: "IPPool"
+    objectNames:
+    - key: name
+      object: machine
+    - key: local-hostname
+      object: machine
+    - key: local_hostname
+      object: machine
+    prefixesFromPool:
+    - key: provisioningCIDR
+      name: provisioning-pool
+      apiGroup: "ipam.metal3.io"
+      kind: "IPPool"
+  networkData:
+    links:
+      ethernets:
+      - id: eno49
+        macAddress:
+          fromHostInterface: eno49
+        type: phy
+      - id: eno50
+        macAddress:
+          fromHostInterface: eno50
+        type: phy
+      vlans:
+      - id: vlan3
+        macAddress:
+          fromHostInterface: eno49
+        mtu: 1500
+        vlanID: 3
+        vlanLink: eno49
+    networks:
+      ipv4:
+      - id: externalv4
+        ipAddressFromIPPool: externalv4-pool
+        link: vlan3
+        routes:
+        - gateway:
+            fromIPPool: externalv4-pool
+          network: 0.0.0.0
+          prefix: 0
+    services:
+      dns:
+      - {{ .Values.externalDNS | quote }}
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+kind: KubeadmConfigTemplate
+metadata:
+  name: {{ include "capm3.clusterName" . }}-workers
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  template:
+    spec:
+      files:
+      - content: |
+          #!/bin/bash
+          set -e
+          url="$1"
+          dst="$2"
+          filename="$(basename $url)"
+          tmpfile="/tmp/$filename"
+          curl -sSL -w "%{http_code}" "$url" | sed "s:/usr/bin:/usr/local/bin:g" > /tmp/"$filename"
+          http_status=$(cat "$tmpfile" | tail -n 1)
+          if [ "$http_status" != "200" ]; then
+            echo "Error: unable to retrieve $filename file";
+            exit 1;
+          else
+            cat "$tmpfile"| sed '$d' > "$dst";
+          fi
+        owner: root:root
+        path: /usr/local/bin/retrieve.configuration.files.sh
+        permissions: "0755"
+      - content: |
+          [connection]
+          id=eno49
+          type=ethernet
+          interface-name=eno49
+          master=ironicendpoint
+          slave-type=bridge
+          autoconnect=yes
+          autoconnect-priority=999
+        owner: root:root
+        path: /etc/NetworkManager/system-connections/enp1s0.nmconnection
+        permissions: "0600"
+      - content: |
+          [connection]
+          id=ironicendpoint
+          type=bridge
+          interface-name=ironicendpoint
+
+          [bridge]
+          stp=false
+
+          [ipv4]
+          address1={{ "{{ ds.meta_data.provisioningIP }}" }}/{{ "{{ ds.meta_data.provisioningCIDR }}" }}
+          method=manual
+
+          [ipv6]
+          addr-gen-mode=eui64
+          method=ignore
+        owner: root:root
+        path: /etc/NetworkManager/system-connections/ironicendpoint.nmconnection
+        permissions: "0600"
+      - content: |
+          [registries.search]
+          registries = ['docker.io']
+
+          [registries.insecure]
+          registries = ['192.168.111.1:5000']
+        owner: root:root
+        path: /etc/containers/registries.conf
+        permissions: "0644"
+      - content: |
+          [connection]
+          id=Vlan eno49.3
+          type=vlan
+          autoconnect-priority=999
+          interface-name=eno49.3
+
+          [vlan]
+          flags=1
+          id=3
+          parent=eno49
+
+          [ipv4]
+          method=auto
+
+          [ipv6]
+          addr-gen-mode=eui64
+          method=ignore
+        owner: root:root
+        path: /etc/NetworkManager/system-connections/enp1s0.3.nmconnection
+        permissions: "0600"
+      joinConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+          - name: node-labels
+            value: metal3.io/uuid={{ "{{ ds.meta_data.uuid }}" }}
+          - name: provider-id
+            value: metal3://{{ "{{ ds.meta_data.providerid }}" }}
+          - name: feature-gates
+            value: AllAlpha=false
+          - name: cgroup-driver
+            value: systemd
+          - name: container-runtime-endpoint
+            value: unix:///var/run/crio/crio.sock
+          - name: runtime-request-timeout
+            value: 5m
+          name: '{{ "{{ ds.meta_data.name }}" }}'
+      preKubeadmCommands:
+      - rm /etc/cni/net.d/*
+      - systemctl restart NetworkManager.service
+      - nmcli connection load /etc/NetworkManager/system-connections/ironicendpoint.nmconnection
+      - nmcli connection up ironicendpoint
+      - nmcli connection load /etc/NetworkManager/system-connections/enp1s0.nmconnection
+      - nmcli connection up enp1s0
+      - nmcli connection load /etc/NetworkManager/system-connections/enp1s0.3.nmconnection
+      - nmcli connection up /etc/NetworkManager/system-connections/enp1s0.3.nmconnection
+      - systemctl enable --now crio
+      - sleep 30
+      - systemctl enable --now kubelet
+      - sleep 120
+      users:
+      - name: metal3
+        sshAuthorizedKeys:
+        - {{ .Values.sshPublicKey | quote }}
+        sudo: ALL=(ALL) NOPASSWD:ALL

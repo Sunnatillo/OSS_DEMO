@@ -1,0 +1,55 @@
+# Default values for the capm3-standalone-cp ClusterTemplate.
+# k0rdent injects ClusterDeployment.spec.config over these defaults.
+#
+# Lab-specific defaults mirror the existing BML manifests so the chart renders
+# an equivalent cluster out of the box. Override per ClusterDeployment.
+
+# Cluster identity. Defaults to the ClusterDeployment/Release name.
+clusterName: ""
+# Namespace for rendered objects. Empty => follows the ClusterDeployment namespace.
+namespace: ""
+
+# Kubernetes + OS image selection. The node image is served from the httpd
+# server exactly as in the imperative flow:
+#   {image.baseURL}/{imageOS}_NODE_IMAGE_K8S_{k8sVersion}-raw.img
+k8sVersion: v1.36.0
+imageOS: CENTOS_10
+image:
+  baseURL: http://172.22.0.1/images
+  diskFormat: raw
+  checksumType: sha256
+
+clusterNetwork:
+  pods:
+    - 192.168.0.0/18
+  services:
+    - 10.96.0.0/12
+
+controlPlane:
+  replicas: 1
+  # keepalived VIP == Metal3Cluster.controlPlaneEndpoint.host.
+  # NOTE: the keepalived.conf embedded in the control-plane cloud-init also
+  # hardcodes this VIP and the eno49.3 interface; keep them in sync if changed.
+  endpoint:
+    host: 192.168.111.249
+    port: 6443
+
+worker:
+  replicas: 1
+
+# DNS handed to provisioned nodes (was ${EXTERNAL_DNS_V4}).
+externalDNS: 8.8.8.8
+
+# SSH key injected into the provisioned nodes' metal3 user.
+sshPublicKey: ""
+
+ipPools:
+  provisioning:
+    start: 172.22.0.100
+    end: 172.22.0.200
+    prefix: 24
+  external:
+    gateway: 192.168.111.1
+    start: 192.168.111.100
+    end: 192.168.111.200
+    prefix: 24

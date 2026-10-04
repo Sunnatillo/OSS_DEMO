@@ -1,0 +1,10 @@
+# Namespace the providers are installed into (k0rdent system namespace).
+namespace: kcm-system
+
+# Metal3 provider versions (latest as of 2026-10).
+capm3Version: v1.14.1
+ipamVersion: v1.14.1
+
+# kubeadm bootstrap/control-plane version. Match the CAPI core version that
+# KCM v1.11.0 bundles (v1.13.4) to avoid a contract mismatch.
+capiVersion: v1.13.4

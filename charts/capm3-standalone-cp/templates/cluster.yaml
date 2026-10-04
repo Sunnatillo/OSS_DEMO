@@ -1,0 +1,32 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: {{ include "capm3.clusterName" . }}
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      {{- toYaml .Values.clusterNetwork.pods | nindent 6 }}
+    services:
+      cidrBlocks:
+      {{- toYaml .Values.clusterNetwork.services | nindent 6 }}
+  controlPlaneRef:
+    apiGroup: controlplane.cluster.x-k8s.io
+    kind: KubeadmControlPlane
+    name: {{ include "capm3.clusterName" . }}
+  infrastructureRef:
+    apiGroup: infrastructure.cluster.x-k8s.io
+    kind: Metal3Cluster
+    name: {{ include "capm3.clusterName" . }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: Metal3Cluster
+metadata:
+  name: {{ include "capm3.clusterName" . }}
+  namespace: {{ include "capm3.namespace" . }}
+spec:
+  controlPlaneEndpoint:
+    host: {{ .Values.controlPlane.endpoint.host | quote }}
+    port: {{ .Values.controlPlane.endpoint.port }}
+  cloudProviderEnabled: false

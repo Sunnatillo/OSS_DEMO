@@ -1,0 +1,36 @@
+# Cluster API Operator provider resources. k0rdent installs providers through
+# the operator; these CRs tell it which components to deploy.
+# Confirmed against KCM v1.11.0: operator CRDs are served at
+# operator.cluster.x-k8s.io/v1alpha2 (they appear once the core CAPI provider
+# has reconciled, i.e. after the Management object installs cluster-api).
+apiVersion: operator.cluster.x-k8s.io/v1alpha2
+kind: InfrastructureProvider
+metadata:
+  name: metal3
+  namespace: {{ .Values.namespace }}
+spec:
+  version: {{ .Values.capm3Version }}
+---
+apiVersion: operator.cluster.x-k8s.io/v1alpha2
+kind: IPAMProvider
+metadata:
+  name: metal3
+  namespace: {{ .Values.namespace }}
+spec:
+  version: {{ .Values.ipamVersion }}
+---
+apiVersion: operator.cluster.x-k8s.io/v1alpha2
+kind: BootstrapProvider
+metadata:
+  name: kubeadm
+  namespace: {{ .Values.namespace }}
+spec:
+  version: {{ .Values.capiVersion }}
+---
+apiVersion: operator.cluster.x-k8s.io/v1alpha2
+kind: ControlPlaneProvider
+metadata:
+  name: kubeadm
+  namespace: {{ .Values.namespace }}
+spec:
+  version: {{ .Values.capiVersion }}

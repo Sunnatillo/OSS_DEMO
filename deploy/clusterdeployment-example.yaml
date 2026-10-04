@@ -1,0 +1,51 @@
+# Example ClusterDeployment that provisions the Metal3 cluster through our BYO
+# ClusterTemplate. spec.config is passed as Helm values to the capm3-standalone-cp
+# chart, so it mirrors that chart's values.yaml. Must live in the same namespace
+# as the ClusterTemplate (kcm-system).
+#
+# Prerequisites before applying:
+#   - BYO provider + ClusterTemplate registered (k0rdent/providers/*)
+#   - BMO + Ironic deployed (k0rdent/scripts/deploy-ironic-bmo.sh)
+#   - BareMetalHosts enrolled in this namespace (render deploy/bmhosts_crs.yaml.j2
+#     with default_vars/vars.yaml)
+#   - Credential + ConfigMap applied (k0rdent/deploy/credential.yaml, resource-template-configmap.yaml)
+apiVersion: k0rdent.mirantis.com/v1beta1
+kind: ClusterDeployment
+metadata:
+  name: test1
+  namespace: kcm-system
+spec:
+  template: capm3-standalone-cp-0-1-0
+  credential: capm3-stub-credential
+  dryRun: false
+  config:
+    clusterName: test1
+    namespace: kcm-system
+    k8sVersion: v1.36.0
+    imageOS: CENTOS_10
+    image:
+      baseURL: http://172.22.0.1/images
+    clusterNetwork:
+      pods:
+        - 192.168.0.0/18
+      services:
+        - 10.96.0.0/12
+    controlPlane:
+      replicas: 1
+      endpoint:
+        host: 192.168.111.249
+        port: 6443
+    worker:
+      replicas: 1
+    externalDNS: 8.8.8.8
+    sshPublicKey: "REPLACE_WITH_SSH_PUBLIC_KEY"
+    ipPools:
+      provisioning:
+        start: 172.22.0.100
+        end: 172.22.0.200
+        prefix: 24
+      external:
+        gateway: 192.168.111.1
+        start: 192.168.111.100
+        end: 192.168.111.200
+        prefix: 24

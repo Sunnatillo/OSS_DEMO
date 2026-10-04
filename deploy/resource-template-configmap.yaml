@@ -1,0 +1,10 @@
+# Empty resource-template ConfigMap required alongside the stub Credential.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: capm3-cluster-credential-resource-template
+  namespace: kcm-system
+  labels:
+    k0rdent.mirantis.com/component: "kcm"
+  annotations:
+    projectsveltos.io/template: "true"
