@@ -9,10 +9,16 @@
 #
 # Unlike host-setup/clean.sh it does NOT stop/remove unrelated containers,
 # minikube, or libvirt networks, so it is safe on a shared/dev machine.
+#
+# Usage: ./clean.sh [cluster-name]   # arg (or a preset KIND_CLUSTER_NAME) wins over config.env
 
 set -u
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Capture a cluster-name override BEFORE sourcing config.env, which hard-sets
+# KIND_CLUSTER_NAME; without this the teardown would be locked to that one name.
+CLUSTER_OVERRIDE="${1:-${KIND_CLUSTER_NAME:-}}"
 
 # Load site config for cluster/network names, if present.
 if [[ -f "${SCRIPTDIR}/config.env" ]]; then
@@ -20,7 +26,7 @@ if [[ -f "${SCRIPTDIR}/config.env" ]]; then
     . "${SCRIPTDIR}/config.env"
 fi
 
-KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-metal3-mgmt}"
+KIND_CLUSTER_NAME="${CLUSTER_OVERRIDE:-${KIND_CLUSTER_NAME:-metal3-mgmt}}"
 KIND_PROVISIONING_NETWORK="${KIND_PROVISIONING_NETWORK:-bml-provisioning}"
 KIND_EXTERNAL_NETWORK="${KIND_EXTERNAL_NETWORK:-bml-external}"
 EXTERNAL_SUBNET="${EXTERNAL_SUBNET:-192.168.111.0/24}"
