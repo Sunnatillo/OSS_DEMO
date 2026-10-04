@@ -60,7 +60,7 @@ publish_charts() {
   helm package "${SCRIPTDIR}/charts/capm3-provider" \
     "${SCRIPTDIR}/charts/capm3-standalone-cp" -d "${out}"
   helm push "${out}/capm3-provider-0.1.0.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
-  helm push "${out}/capm3-standalone-cp-0.1.1.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
+  helm push "${out}/capm3-standalone-cp-0.1.2.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
 }
 
 register_templates() {
@@ -85,7 +85,24 @@ apply_credential() {
   kubectl apply -f "${SCRIPTDIR}/deploy/resource-template-configmap.yaml"
 }
 
+# Mirror kubeadm's control-plane images into the local registry so provisioned
+# nodes pull them over the LAN (not registry.k8s.io), cutting kubeadm init time.
+seed_registry_images() {
+  [[ -n "${K8S_IMAGES:-}" ]] || return 0
+  if ! command -v skopeo >/dev/null 2>&1; then
+    echo "WARN: skopeo not found; skipping k8s image seeding (nodes pull from registry.k8s.io)." >&2
+    return 0
+  fi
+  local img
+  for img in ${K8S_IMAGES}; do
+    skopeo copy --retry-times 3 --dest-tls-verify=false \
+      "docker://registry.k8s.io/${img}" \
+      "docker://${REGISTRY_HOST}/registry.k8s.io/${img}"
+  done
+}
+
 ensure_kind
+seed_registry_images
 install_kcm
 trim_providers
 publish_charts

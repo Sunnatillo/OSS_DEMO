@@ -167,11 +167,17 @@ spec:
         path: /etc/NetworkManager/system-connections/ironicendpoint.nmconnection
         permissions: "0600"
       - content: |
-          [registries.search]
-          registries = ['docker.io']
+          unqualified-search-registries = ["docker.io"]
 
-          [registries.insecure]
-          registries = ['192.168.111.1:5000']
+          [[registry]]
+          location = "192.168.111.1:5000"
+          insecure = true
+
+          [[registry]]
+          location = "registry.k8s.io"
+          [[registry.mirror]]
+          location = "192.168.111.1:5000/registry.k8s.io"
+          insecure = true
         owner: root:root
         path: /etc/containers/registries.conf
         permissions: "0644"
