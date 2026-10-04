@@ -109,6 +109,15 @@ deploy_irso() {
     deployment/ironic-standalone-operator-controller-manager
 }
 
+# Render dnsmasq dhcp-host records from PROVISION_MACS (config.env) so the
+# dhcp `ignore: tag:!known` rule serves these hosts instead of ignoring them.
+render_dhcp_hosts() {
+  local mac
+  for mac in ${PROVISION_MACS:-}; do
+    printf '        - %s\n' "${mac}"
+  done
+}
+
 # --- Ironic instance via IRSO ---
 deploy_ironic() {
   local iface="${PROVISION_INTERFACE:-}"
@@ -137,6 +146,8 @@ spec:
       rangeBegin: "${DHCP_RANGE_START}"
       rangeEnd: "${DHCP_RANGE_END}"
       networkCIDR: "${PROVISION_CIDR}"
+      hosts:
+$(render_dhcp_hosts)
       ignore:
         - "tag:!known"
     interface: "${iface}"

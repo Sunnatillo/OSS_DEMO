@@ -188,7 +188,7 @@ spec:
   template:
     spec:
       hostSelector:
-        matchLabels:
+        matchLabels: {}
       dataTemplate:
         name: {{ include "capm3.clusterName" . }}-controlplane-template
       image:

@@ -42,7 +42,7 @@ spec:
   template:
     spec:
       hostSelector:
-        matchLabels:
+        matchLabels: {}
       dataTemplate:
         name: {{ include "capm3.clusterName" . }}-workers-template
       image:
