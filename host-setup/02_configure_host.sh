@@ -26,12 +26,15 @@ sudo chown -R "${USER}:${USER}" "${IRONIC_DATA_DIR}"
 # Download required images for ironic if not already present
 pushd "${IRONIC_DATA_DIR}/html/images"
 IMAGE_QCOW="${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}.qcow2"
+RAW_IMAGE="${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img"
 # NODE_IMAGE_URL overrides the default artifactory source (e.g. an OCI bucket).
 NODE_IMAGE_URL="${NODE_IMAGE_URL:-https://artifactory.nordix.org/artifactory/metal3/images/k8s_${K8S_VERSION}/${IMAGE_QCOW}}"
-wget --no-check-certificate -q -O "${IMAGE_QCOW}" "${NODE_IMAGE_URL}"
-qemu-img convert -O raw "${IMAGE_QCOW}" "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img"
-sha256sum "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img" | awk '{print $1}' > "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img.sha256sum"
-wget -q https://tarballs.opendev.org/openstack/ironic-python-agent/dib/ipa-centos9-master.tar.gz
+if [[ ! -f "${RAW_IMAGE}" ]]; then
+    wget --no-check-certificate -q -O "${IMAGE_QCOW}" "${NODE_IMAGE_URL}"
+    qemu-img convert -O raw "${IMAGE_QCOW}" "${RAW_IMAGE}"
+    sha256sum "${RAW_IMAGE}" | awk '{print $1}' > "${RAW_IMAGE}.sha256sum"
+fi
+[[ -f ipa-centos9-master.tar.gz ]] || wget -q https://tarballs.opendev.org/openstack/ironic-python-agent/dib/ipa-centos9-master.tar.gz
 popd
 
 # shellcheck disable=SC1091
@@ -247,7 +250,13 @@ sleep 5
 
 # Start httpd-infra container serve provisioning images for ironic
 # shellcheck disable=SC2086
-sudo "${CONTAINER_RUNTIME}" run -d --net host --privileged --name httpd-infra \
-    -v "${IRONIC_DATA_DIR}":/shared --entrypoint /bin/runhttpd \
-    --env "PROVISIONING_INTERFACE=ironicendpoint" "quay.io/metal3-io/ironic"
+httpd_state=$(sudo "${CONTAINER_RUNTIME}" inspect httpd-infra --format "{{.State.Status}}" || echo "error")
+if [[ "${httpd_state}" == "exited" ]]; then
+    sudo "${CONTAINER_RUNTIME}" start httpd-infra
+elif [[ "${httpd_state}" != "running" ]]; then
+    sudo "${CONTAINER_RUNTIME}" rm httpd-infra -f || true
+    sudo "${CONTAINER_RUNTIME}" run -d --net host --privileged --name httpd-infra \
+        -v "${IRONIC_DATA_DIR}":/shared --entrypoint /bin/runhttpd \
+        --env "PROVISIONING_INTERFACE=ironicendpoint" "quay.io/metal3-io/ironic"
+fi
 sleep 5
