@@ -2,9 +2,7 @@ apiVersion: v2
 name: capm3-standalone-cp
 description: >-
   BYO k0rdent ClusterTemplate that renders a Metal3 standalone (kubeadm)
-  control-plane cluster for the Metal3 bare metal lab. Ported from the
-  imperative manifests in the original project-infra repo
-  (jenkins/scripts/bare_metal_lab/bml_test/manifests).
+  control-plane cluster for the Metal3.
 type: application
 version: 0.1.0
 appVersion: "1.0.0"

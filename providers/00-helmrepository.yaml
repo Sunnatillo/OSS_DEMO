@@ -14,5 +14,7 @@ spec:
   interval: 10m0s
   provider: generic
   type: oci
+  # Plain-HTTP lab registry (registry:2.7.1) => Flux must pull insecurely.
+  insecure: true
   # Replace REGISTRY_HOST with the lab registry reachable from the mgmt cluster.
   url: oci://REGISTRY_HOST/k0rdent-byo
