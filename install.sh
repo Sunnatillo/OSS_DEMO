@@ -31,7 +31,7 @@ ensure_kind() {
   if [[ "${SETUP_HOST_NETWORK:-false}" == "true" ]]; then
     # Creates the kind cluster AND the provisioning/external L2 networking
     # (bridges, ironicendpoint veth, docker nets, node attach), httpd + registry.
-    KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME}" K8S_VERSION="${K8S_VERSION}" IMAGE_OS="${IMAGE_OS}" \
+    KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME}" K8S_VERSION="${K8S_VERSION}" IMAGE_OS="${IMAGE_OS}" NODE_IMAGE_URL="${NODE_IMAGE_URL:-}" \
       "${SCRIPTDIR}/host-setup/02_configure_host.sh"
   elif ! kind get clusters | grep -qx "${KIND_CLUSTER_NAME}"; then
     kind create cluster --name "${KIND_CLUSTER_NAME}"

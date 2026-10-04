@@ -7,7 +7,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # shellcheck disable=SC1091
 . "${SCRIPTDIR}"/lib/vars.sh
 
-K8S_VERSION="${K8S_VERSION:-v1.36.0}"
+K8S_VERSION="${K8S_VERSION:-v1.36.2}"
 IMAGE_OS="${IMAGE_OS:-CENTOS_10}"
 KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-bml}"
 KIND_NODE_NAME="${KIND_CLUSTER_NAME}-control-plane"
@@ -25,8 +25,11 @@ sudo chown -R "${USER}:${USER}" "${IRONIC_DATA_DIR}"
 
 # Download required images for ironic if not already present
 pushd "${IRONIC_DATA_DIR}/html/images"
-wget --no-check-certificate -q "https://artifactory.nordix.org/artifactory/metal3/images/k8s_${K8S_VERSION}/${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}.qcow2"
-qemu-img convert -O raw "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}.qcow2" "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img"
+IMAGE_QCOW="${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}.qcow2"
+# NODE_IMAGE_URL overrides the default artifactory source (e.g. an OCI bucket).
+NODE_IMAGE_URL="${NODE_IMAGE_URL:-https://artifactory.nordix.org/artifactory/metal3/images/k8s_${K8S_VERSION}/${IMAGE_QCOW}}"
+wget --no-check-certificate -q -O "${IMAGE_QCOW}" "${NODE_IMAGE_URL}"
+qemu-img convert -O raw "${IMAGE_QCOW}" "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img"
 sha256sum "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img" | awk '{print $1}' > "${IMAGE_OS}_NODE_IMAGE_K8S_${K8S_VERSION}-raw.img.sha256sum"
 wget -q https://tarballs.opendev.org/openstack/ironic-python-agent/dib/ipa-centos9-master.tar.gz
 popd

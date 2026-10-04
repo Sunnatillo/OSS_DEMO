@@ -13,7 +13,7 @@ Target namespace for all rendered objects.
 {{- end -}}
 
 {{/*
-Node OS image file name, e.g. CENTOS_10_NODE_IMAGE_K8S_v1.36.0-raw.img
+Node OS image file name, e.g. CENTOS_10_NODE_IMAGE_K8S_v1.36.2-raw.img
 */}}
 {{- define "capm3.imageFile" -}}
 {{- printf "%s_NODE_IMAGE_K8S_%s-raw.img" .Values.imageOS .Values.k8sVersion -}}

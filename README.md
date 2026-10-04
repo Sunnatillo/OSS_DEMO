@@ -99,7 +99,7 @@ k0rdent/
 ├── charts/
 │   ├── capm3-standalone-cp/          # ClusterTemplate chart (Metal3 + kubeadm cluster)
 │   │   ├── Chart.yaml                #   declares providers via cluster.x-k8s.io/provider annotation
-│   │   ├── values.yaml               #   lab defaults (CENTOS_10, v1.36.0, httpd image URL, VIP, pools)
+│   │   ├── values.yaml               #   lab defaults (CENTOS_10, v1.36.2, httpd image URL, VIP, pools)
 │   │   └── templates/                #   cluster, ippools, controlplane, workers, _helpers
 │   └── capm3-provider/               # ProviderTemplate chart
 │       ├── Chart.yaml
