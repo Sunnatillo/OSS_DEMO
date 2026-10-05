@@ -54,7 +54,7 @@ Copy the entire `k0rdent/` tree:
 k0rdent/
   README.md                         # comprehensive reference (read it)
   AGENT_HANDOVER.md                 # this file
-  config.env                        # site values — MUST edit REGISTRY_HOST, sshPublicKey, network params
+  config.env                        # site values — MUST edit sshPublicKey, network params
   install.sh                        # orchestrator: kind+networking → KCM → templates → BMO/Ironic
   charts/metal3-cluster/            # ClusterTemplate (Metal3 + kubeadm) — ported from project-infra manifests
   charts/capm3-provider/            # ProviderTemplate chart:
@@ -79,8 +79,8 @@ The source Metal3 manifests this was ported from live in the project-infra repo:
    nets, kind-node attach at `172.22.0.9`/`192.168.111.9`, httpd, registry).
    `SETUP_HOST_NETWORK=false` → plain kind; `--skip-kind` → reuse context.
    Then `helm install kcm … --version 1.11.0`.
-2. Push `capm3-provider` + `metal3-cluster` charts to an OCI registry
-   (`REGISTRY_HOST`). Flux `HelmRepository` (label `k0rdent.mirantis.com/managed: "true"`,
+2. Push `capm3-provider` + `metal3-cluster` charts to the lab OCI registry
+   (hardcoded `192.168.111.1:5000`). Flux `HelmRepository` (label `k0rdent.mirantis.com/managed: "true"`,
    `insecure: true` for plain-HTTP registries) serves them.
 3. Apply `ProviderTemplate` (cluster-scoped) + `ClusterTemplate` (in `kcm-system`).
 4. Patch `Management.spec.providers` → add `{name: cluster-api-provider-metal3,
@@ -140,7 +140,7 @@ kubectl -n kcm-system get pods | grep -E 'capm3|ipam-controller'
 kubectl get providertemplate cluster-api-provider-metal3-0-1-0 -o jsonpath='{.status.valid}'
 kubectl -n kcm-system get clustertemplate metal3-cluster-0-1-2 -o jsonpath='{.status.valid}'
 # ClusterDeployment accepted (dry-run; needs Credential + ProviderInterface)
-kubectl apply --dry-run=server -f deploy/clusterdeployment-example.yaml
+kubectl apply --dry-run=server -f deploy/clusterdeployment.yaml
 # BMO / IRSO / Ironic
 kubectl -n baremetal-operator-system get pods
 kubectl -n ironic-standalone-operator-system get pods
@@ -161,7 +161,7 @@ provisioning NIC + IPA source) and real provisioning.
    `bmh`/`clusterdeployment` reach provisioned/ready.
 3. **(optional) ServiceTemplate-ify BMO/IRSO/Ironic** — deploy them as k0rdent
    `ServiceTemplate`s (support Helm + kustomize) so k0rdent/Flux manages them.
-4. **config.env** — fill `REGISTRY_HOST`, `sshPublicKey`, keepalived VIP, DHCP
+4. **config.env** — fill `sshPublicKey`, keepalived VIP, DHCP
    range, httpd base URL. `PROVISION_INTERFACE` can stay empty (auto-discovered).
 5. **Chart versioning** — if you change a chart, bump its version and the
    `-X-Y-Z` suffix in the ProviderTemplate/ClusterTemplate names + `install.sh`.
@@ -255,7 +255,7 @@ kubectl delete management.k0rdent kcm ; helm uninstall kcm -n kcm-system
 
 These are hardcoded to the current BML lab — review before reusing elsewhere:
 
-- **`config.env`**: `REGISTRY_HOST`, `SSH_PUBLIC_KEY_FILE`, `KEEPALIVED_VIP`,
+- **`config.env`**: `SSH_PUBLIC_KEY_FILE`, `KEEPALIVED_VIP`,
   `DHCP_RANGE_*`, `PROVISION_CIDR`, `IMAGE_BASE_URL`, `CONTROLPLANE_VIP`, pools.
 - **`host-setup/02_configure_host.sh` + `host-setup/lib/vars.sh`**: physical NICs
   `eno49` (provisioning) and `bmext`/`EXTERNAL_IFACE` (external), `IRONIC_DATA_DIR`
@@ -265,4 +265,4 @@ These are hardcoded to the current BML lab — review before reusing elsewhere:
   `templates/workers.yaml`): interfaces `eno49`/`eno50`/`eno49.3`/`enp1s0`, VLAN
   `3`, control-plane VIP `192.168.111.249`, insecure registry `192.168.111.1:5000`,
   embedded SSH key.
-- **`deploy/clusterdeployment-example.yaml`**: `sshPublicKey`, pools, VIP, versions.
+- **`deploy/clusterdeployment.yaml`**: `sshPublicKey`, pools, VIP, versions.

@@ -10,7 +10,7 @@
 # Usage:
 #   ./install.sh [--skip-kind]      # reuse the current kubectl context instead of kind
 #
-# Reads k0rdent/config.env. Set REGISTRY_HOST before running.
+# Reads k0rdent/config.env.
 
 set -eux
 
@@ -59,14 +59,12 @@ publish_charts() {
   mkdir -p "${out}"
   helm package "${SCRIPTDIR}/charts/capm3-provider" \
     "${SCRIPTDIR}/charts/metal3-cluster" -d "${out}"
-  helm push "${out}/capm3-provider-0.1.0.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
-  helm push "${out}/metal3-cluster-0.1.2.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
+  helm push "${out}/capm3-provider-0.1.0.tgz" "oci://192.168.111.1:5000/k0rdent-byo" --plain-http
+  helm push "${out}/metal3-cluster-0.1.2.tgz" "oci://192.168.111.1:5000/k0rdent-byo" --plain-http
 }
 
 register_templates() {
-  # Point the HelmRepository at the configured registry, then apply the sources.
-  sed "s#oci://REGISTRY_HOST/k0rdent-byo#oci://${REGISTRY_HOST}/k0rdent-byo#" \
-    "${SCRIPTDIR}/providers/00-helmrepository.yaml" | kubectl apply -f -
+  kubectl apply -f "${SCRIPTDIR}/providers/00-helmrepository.yaml"
   kubectl apply -f "${SCRIPTDIR}/providers/10-providertemplate-metal3.yaml"
   kubectl apply -f "${SCRIPTDIR}/providers/20-clustertemplate-metal3-cluster.yaml"
 }
@@ -97,7 +95,7 @@ seed_registry_images() {
   for img in ${K8S_IMAGES}; do
     skopeo copy --retry-times 3 --dest-tls-verify=false \
       "docker://registry.k8s.io/${img}" \
-      "docker://${REGISTRY_HOST}/registry.k8s.io/${img}"
+      "docker://192.168.111.1:5000/registry.k8s.io/${img}"
   done
 }
 
@@ -116,7 +114,6 @@ cat <<'EOF'
 
 Management cluster ready. Next (lab, with real servers):
   1. Enroll BareMetalHosts in namespace kcm-system (create BMH manifests manually).
-  2. Set sshPublicKey in k0rdent/deploy/clusterdeployment-example.yaml.
-  3. kubectl apply -f k0rdent/deploy/clusterdeployment-example.yaml
-  4. Watch: kubectl -n kcm-system get bmh,clusterdeployment -w
+  2. kubectl apply -f k0rdent/deploy/clusterdeployment.yaml
+  3. Watch: kubectl -n kcm-system get bmh,clusterdeployment -w
 EOF

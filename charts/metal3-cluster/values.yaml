@@ -27,9 +27,6 @@ clusterNetwork:
 
 controlPlane:
   replicas: 1
-  # keepalived VIP == Metal3Cluster.controlPlaneEndpoint.host.
-  # NOTE: the keepalived.conf embedded in the control-plane cloud-init also
-  # hardcodes this VIP and the eno49.3 interface; keep them in sync if changed.
   endpoint:
     host: 192.168.111.249
     port: 6443
@@ -37,10 +34,8 @@ controlPlane:
 worker:
   replicas: 1
 
-# DNS handed to provisioned nodes (was ${EXTERNAL_DNS_V4}).
 externalDNS: 8.8.8.8
 
-# SSH key injected into the provisioned nodes' metal3 user.
 sshPublicKey: ""
 
 ipPools:

@@ -113,7 +113,7 @@ k0rdent/
 ├── deploy/
 │   ├── credential.yaml               # stub Secret + Credential (bare metal has no cloud identity)
 │   ├── resource-template-configmap.yaml
-│   └── clusterdeployment-example.yaml
+│   └── clusterdeployment.yaml
 └── scripts/
     └── deploy-ironic-bmo.sh          # BMO + IRSO + Ironic (pinned branches; auto-discovers prov NIC)
 
@@ -140,14 +140,14 @@ host-setup/                           # COPIED from the original project-infra r
    to reuse the current context.
 2. **KCM** — `helm install kcm oci://ghcr.io/k0rdent/kcm/charts/kcm --version 1.11.0`.
 3. **(optional) Trim providers** — drop the default cloud providers from `Management` (faster, lighter).
-4. **Publish BYO charts** — `helm package` + `helm push` `capm3-provider` and `metal3-cluster` to an OCI registry (`REGISTRY_HOST` in `config.env`; in the lab, the existing `:5000` registry).
+4. **Publish BYO charts** — `helm package` + `helm push` `capm3-provider` and `metal3-cluster` to the lab OCI registry (hardcoded `192.168.111.1:5000`).
 5. **Register templates** — apply `providers/00,10,20` (HelmRepository, ProviderTemplate, ClusterTemplate).
 6. **Enable Metal3** — patch `Management.spec.providers` to add `cluster-api-provider-metal3`. The operator then installs CAPM3, IPAM, kubeadm providers, and the ProviderInterface.
 7. **Deploy BMO + Ironic** — `scripts/deploy-ironic-bmo.sh` (BMO + IRSO + Ironic CR) on the provisioning host.
 8. **Credential** — apply `deploy/credential.yaml` + `deploy/resource-template-configmap.yaml`.
 9. **(lab) Provision** — enroll `BareMetalHost` objects (create the manifests
    manually), set `sshPublicKey`, then
-   `kubectl apply -f deploy/clusterdeployment-example.yaml`.
+   `kubectl apply -f deploy/clusterdeployment.yaml`.
 
 ### Prerequisites (lab)
 - Host provisioning networking is created automatically by `install.sh`
