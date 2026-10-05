@@ -3,13 +3,13 @@
 apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterTemplate
 metadata:
-  name: metal3-cluster-0-1-2
+  name: metal3-cluster-0-1-1
   namespace: kcm-system
 spec:
   helm:
     chartSpec:
       chart: metal3-cluster
-      version: 0.1.2
+      version: 0.1.1
       interval: 10m0s
       sourceRef:
         kind: HelmRepository

@@ -2,7 +2,7 @@
 # to k0rdent. Package and push the charts here before applying the templates:
 #   helm package k0rdent/charts/capm3-provider k0rdent/charts/metal3-cluster
 #   helm push capm3-provider-0.1.0.tgz        oci://192.168.111.1:5000/k0rdent-byo
-#   helm push metal3-cluster-0.1.2.tgz        oci://192.168.111.1:5000/k0rdent-byo
+#   helm push metal3-cluster-0.1.1.tgz        oci://192.168.111.1:5000/k0rdent-byo
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:

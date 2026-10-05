@@ -138,7 +138,7 @@ kubectl get infrastructureproviders,ipamproviders,bootstrapproviders,controlplan
 kubectl -n kcm-system get pods | grep -E 'capm3|ipam-controller'
 # templates valid
 kubectl get providertemplate cluster-api-provider-metal3-0-1-0 -o jsonpath='{.status.valid}'
-kubectl -n kcm-system get clustertemplate metal3-cluster-0-1-2 -o jsonpath='{.status.valid}'
+kubectl -n kcm-system get clustertemplate metal3-cluster-0-1-1 -o jsonpath='{.status.valid}'
 # ClusterDeployment accepted (dry-run; needs Credential + ProviderInterface)
 kubectl apply --dry-run=server -f deploy/clusterdeployment.yaml
 # BMO / IRSO / Ironic
@@ -209,7 +209,7 @@ kubectl -n registry port-forward svc/registry 5001:5000 &   # host:5001 → regi
 # 3. push the BYO charts (plain HTTP)
 helm package charts/capm3-provider charts/metal3-cluster -d /tmp/byo
 helm push /tmp/byo/capm3-provider-0.1.0.tgz oci://localhost:5001/k0rdent-byo --plain-http
-helm push /tmp/byo/metal3-cluster-0.1.2.tgz oci://localhost:5001/k0rdent-byo --plain-http
+helm push /tmp/byo/metal3-cluster-0.1.1.tgz oci://localhost:5001/k0rdent-byo --plain-http
 
 # 4. HelmRepository must point at the in-cluster svc AND be insecure:
 #    url: oci://registry.registry.svc.cluster.local:5000/k0rdent-byo , insecure: true
