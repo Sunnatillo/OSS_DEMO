@@ -1,12 +1,10 @@
 # Registers the Metal3 ClusterTemplate with k0rdent. Must live in the same
-# namespace as the ClusterDeployment that references it (metal3 here).
-# sourceRef cannot cross namespaces; it uses the metal3 copy of the
-# HelmRepository from 00-helmrepository.yaml.
+# namespace as the ClusterDeployment that references it (kcm-system here).
 apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterTemplate
 metadata:
   name: metal3-cluster-0-1-1
-  namespace: metal3
+  namespace: kcm-system
 spec:
   helm:
     chartSpec:

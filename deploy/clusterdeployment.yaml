@@ -1,7 +1,7 @@
 # Example ClusterDeployment that provisions the Metal3 cluster through our BYO
 # ClusterTemplate. spec.config is passed as Helm values to the metal3-cluster
 # chart, so it mirrors that chart's values.yaml. Must live in the same namespace
-# as the ClusterTemplate (metal3).
+# as the ClusterTemplate (kcm-system).
 #
 # Prerequisites before applying:
 #   - BYO provider + ClusterTemplate registered (k0rdent/providers/*)
@@ -12,14 +12,14 @@ apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterDeployment
 metadata:
   name: test1
-  namespace: metal3
+  namespace: kcm-system
 spec:
   template: metal3-cluster-0-1-1
   credential: capm3-stub-credential
   dryRun: false
   config:
     clusterName: test1
-    namespace: metal3
+    namespace: kcm-system
     k8sVersion: v1.36.2
     imageOS: CENTOS_10
     image:
