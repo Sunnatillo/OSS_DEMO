@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: capm3-cluster-credential-resource-template
-  namespace: kcm-system
+  namespace: metal3
   labels:
     k0rdent.mirantis.com/component: "kcm"
   annotations:

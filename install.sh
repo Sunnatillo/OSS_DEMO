@@ -83,6 +83,12 @@ apply_credential() {
   kubectl apply -f "${SCRIPTDIR}/deploy/resource-template-configmap.yaml"
 }
 
+# Namespace for the child-cluster objects (ClusterTemplate, Credential,
+# ClusterDeployment, BareMetalHosts), separate from kcm-system (management plane).
+ensure_target_namespace() {
+  kubectl create namespace metal3 --dry-run=client -o yaml | kubectl apply -f -
+}
+
 # Mirror kubeadm's control-plane images into the local registry so provisioned
 # nodes pull them over the LAN (not registry.k8s.io), cutting kubeadm init time.
 seed_registry_images() {
@@ -102,6 +108,7 @@ seed_registry_images() {
 ensure_kind
 seed_registry_images
 install_kcm
+ensure_target_namespace
 trim_providers
 publish_charts
 register_templates
@@ -113,7 +120,7 @@ set +x
 cat <<'EOF'
 
 Management cluster ready. Next (lab, with real servers):
-  1. Enroll BareMetalHosts in namespace kcm-system (create BMH manifests manually).
+  1. Enroll BareMetalHosts in namespace metal3 (create BMH manifests manually).
   2. kubectl apply -f k0rdent/deploy/clusterdeployment.yaml
-  3. Watch: kubectl -n kcm-system get bmh,clusterdeployment -w
+  3. Watch: kubectl -n metal3 get bmh,clusterdeployment -w
 EOF

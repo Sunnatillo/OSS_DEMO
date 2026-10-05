@@ -1,10 +1,11 @@
-# Registers the Metal3 standalone-CP ClusterTemplate with k0rdent. Must live in
-# the same namespace as the ClusterDeployment that references it (kcm-system here).
+# Registers the Metal3 ClusterTemplate with k0rdent. Must live in the same
+# namespace as the ClusterDeployment that references it (metal3 here). The
+# HelmRepository stays in kcm-system, so sourceRef names that namespace.
 apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterTemplate
 metadata:
   name: metal3-cluster-0-1-1
-  namespace: kcm-system
+  namespace: metal3
 spec:
   helm:
     chartSpec:
@@ -14,3 +15,4 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: k0rdent-byo-metal3
+        namespace: kcm-system
