@@ -1,5 +1,5 @@
 # Example ClusterDeployment that provisions the Metal3 cluster through our BYO
-# ClusterTemplate. spec.config is passed as Helm values to the capm3-standalone-cp
+# ClusterTemplate. spec.config is passed as Helm values to the metal3-cluster
 # chart, so it mirrors that chart's values.yaml. Must live in the same namespace
 # as the ClusterTemplate (kcm-system).
 #
@@ -14,7 +14,7 @@ metadata:
   name: test1
   namespace: kcm-system
 spec:
-  template: capm3-standalone-cp-0-1-2
+  template: metal3-cluster-0-1-2
   credential: capm3-stub-credential
   dryRun: false
   config:

@@ -53,7 +53,7 @@ Therefore, on OSS we must **Bring Our Own**:
 │  IRSO (release-0.10, kustomize)  ── reconciles the Ironic CR                                             │
 │  Ironic instance (Ironic CR)     ── DHCP/PXE/HTTP over the provisioning network                          │
 │                                                                                                          │
-│  ClusterDeployment (capm3-standalone-cp template) ──► renders CAPI/Metal3 objects                       │
+│  ClusterDeployment (metal3-cluster template) ──► renders CAPI/Metal3 objects                            │
 └──────────────────────────────────────────────────────────────────────────────┬───────────────────────┘
                                                                                  │ PXE / IPMI
                                                                                  ▼
@@ -96,7 +96,7 @@ k0rdent/
 ├── install.sh                        # orchestrator (kind → KCM → templates → BMO/Ironic)
 ├── clean.sh                          # scoped teardown (this lab's cluster/networks only)
 ├── charts/
-│   ├── capm3-standalone-cp/          # ClusterTemplate chart (Metal3 + kubeadm cluster)
+│   ├── metal3-cluster/               # ClusterTemplate chart (Metal3 + kubeadm cluster)
 │   │   ├── Chart.yaml                #   declares providers via cluster.x-k8s.io/provider annotation
 │   │   ├── values.yaml               #   lab defaults (CENTOS_10, v1.36.2, httpd image URL, VIP, pools)
 │   │   └── templates/                #   cluster, ippools, controlplane, workers, _helpers
@@ -109,8 +109,7 @@ k0rdent/
 ├── providers/
 │   ├── 00-helmrepository.yaml        # Flux OCI source for the BYO charts
 │   ├── 10-providertemplate-metal3.yaml
-│   ├── 20-clustertemplate-capm3-standalone-cp.yaml
-│   └── 30-management-providers-patch.yaml  # snippet to merge into Management.spec.providers
+│   └── 20-clustertemplate-metal3-cluster.yaml
 ├── deploy/
 │   ├── credential.yaml               # stub Secret + Credential (bare metal has no cloud identity)
 │   ├── resource-template-configmap.yaml
@@ -141,7 +140,7 @@ host-setup/                           # COPIED from the original project-infra r
    to reuse the current context.
 2. **KCM** — `helm install kcm oci://ghcr.io/k0rdent/kcm/charts/kcm --version 1.11.0`.
 3. **(optional) Trim providers** — drop the default cloud providers from `Management` (faster, lighter).
-4. **Publish BYO charts** — `helm package` + `helm push` `capm3-provider` and `capm3-standalone-cp` to an OCI registry (`REGISTRY_HOST` in `config.env`; in the lab, the existing `:5000` registry).
+4. **Publish BYO charts** — `helm package` + `helm push` `capm3-provider` and `metal3-cluster` to an OCI registry (`REGISTRY_HOST` in `config.env`; in the lab, the existing `:5000` registry).
 5. **Register templates** — apply `providers/00,10,20` (HelmRepository, ProviderTemplate, ClusterTemplate).
 6. **Enable Metal3** — patch `Management.spec.providers` to add `cluster-api-provider-metal3`. The operator then installs CAPM3, IPAM, kubeadm providers, and the ProviderInterface.
 7. **Deploy BMO + Ironic** — `scripts/deploy-ironic-bmo.sh` (BMO + IRSO + Ironic CR) on the provisioning host.
@@ -236,7 +235,7 @@ provisioning NIC. Both are now handled:
 
 ## 8. Remaining gaps
 
-- **Worker join**: `charts/capm3-standalone-cp/templates/workers.yaml` has an
+- **Worker join**: `charts/metal3-cluster/templates/workers.yaml` has an
   `enp1s0`/`eno49` mismatch in its NetworkManager files and `nmcli` commands
   (the control-plane template is correct). Fix before setting `worker.replicas > 0`.
 - **HA control plane**: validated with a single control-plane node; multi-replica untested.

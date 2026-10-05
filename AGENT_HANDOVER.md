@@ -56,7 +56,7 @@ k0rdent/
   AGENT_HANDOVER.md                 # this file
   config.env                        # site values — MUST edit REGISTRY_HOST, sshPublicKey, network params
   install.sh                        # orchestrator: kind+networking → KCM → templates → BMO/Ironic
-  charts/capm3-standalone-cp/       # ClusterTemplate (Metal3 + kubeadm) — ported from project-infra manifests
+  charts/metal3-cluster/            # ClusterTemplate (Metal3 + kubeadm) — ported from project-infra manifests
   charts/capm3-provider/            # ProviderTemplate chart:
         templates/providers.yaml            → 4 operator provider CRs
         templates/providerinterface.yaml    → REQUIRED ProviderInterface (critical, see §5.1)
@@ -79,7 +79,7 @@ The source Metal3 manifests this was ported from live in the project-infra repo:
    nets, kind-node attach at `172.22.0.9`/`192.168.111.9`, httpd, registry).
    `SETUP_HOST_NETWORK=false` → plain kind; `--skip-kind` → reuse context.
    Then `helm install kcm … --version 1.11.0`.
-2. Push `capm3-provider` + `capm3-standalone-cp` charts to an OCI registry
+2. Push `capm3-provider` + `metal3-cluster` charts to an OCI registry
    (`REGISTRY_HOST`). Flux `HelmRepository` (label `k0rdent.mirantis.com/managed: "true"`,
    `insecure: true` for plain-HTTP registries) serves them.
 3. Apply `ProviderTemplate` (cluster-scoped) + `ClusterTemplate` (in `kcm-system`).
@@ -138,7 +138,7 @@ kubectl get infrastructureproviders,ipamproviders,bootstrapproviders,controlplan
 kubectl -n kcm-system get pods | grep -E 'capm3|ipam-controller'
 # templates valid
 kubectl get providertemplate cluster-api-provider-metal3-0-1-0 -o jsonpath='{.status.valid}'
-kubectl -n kcm-system get clustertemplate capm3-standalone-cp-0-1-0 -o jsonpath='{.status.valid}'
+kubectl -n kcm-system get clustertemplate metal3-cluster-0-1-2 -o jsonpath='{.status.valid}'
 # ClusterDeployment accepted (dry-run; needs Credential + ProviderInterface)
 kubectl apply --dry-run=server -f deploy/clusterdeployment-example.yaml
 # BMO / IRSO / Ironic
@@ -207,14 +207,14 @@ kubectl -n registry expose deployment registry --port=5000
 kubectl -n registry port-forward svc/registry 5001:5000 &   # host:5001 → registry
 
 # 3. push the BYO charts (plain HTTP)
-helm package charts/capm3-provider charts/capm3-standalone-cp -d /tmp/byo
+helm package charts/capm3-provider charts/metal3-cluster -d /tmp/byo
 helm push /tmp/byo/capm3-provider-0.1.0.tgz oci://localhost:5001/k0rdent-byo --plain-http
-helm push /tmp/byo/capm3-standalone-cp-0.1.0.tgz oci://localhost:5001/k0rdent-byo --plain-http
+helm push /tmp/byo/metal3-cluster-0.1.2.tgz oci://localhost:5001/k0rdent-byo --plain-http
 
 # 4. HelmRepository must point at the in-cluster svc AND be insecure:
 #    url: oci://registry.registry.svc.cluster.local:5000/k0rdent-byo , insecure: true
 kubectl apply -f providers/10-providertemplate-metal3.yaml
-kubectl apply -f providers/20-clustertemplate-capm3-standalone-cp.yaml
+kubectl apply -f providers/20-clustertemplate-metal3-cluster.yaml
 
 # 5. enable metal3, then validate (see §6)
 kubectl patch management kcm --type=json -p \
@@ -261,7 +261,7 @@ These are hardcoded to the current BML lab — review before reusing elsewhere:
   `eno49` (provisioning) and `bmext`/`EXTERNAL_IFACE` (external), `IRONIC_DATA_DIR`
   (`/opt/metal3-dev-env`), the `sudo su -l <user>` user, and the node-image
   download URL (`artifactory.nordix.org`).
-- **`charts/capm3-standalone-cp`** (cloud-init in `templates/controlplane.yaml` /
+- **`charts/metal3-cluster`** (cloud-init in `templates/controlplane.yaml` /
   `templates/workers.yaml`): interfaces `eno49`/`eno50`/`eno49.3`/`enp1s0`, VLAN
   `3`, control-plane VIP `192.168.111.249`, insecure registry `192.168.111.1:5000`,
   embedded SSH key.

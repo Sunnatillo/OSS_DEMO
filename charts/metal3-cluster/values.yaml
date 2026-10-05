@@ -1,4 +1,4 @@
-# Default values for the capm3-standalone-cp ClusterTemplate.
+# Default values for the metal3-cluster ClusterTemplate.
 # k0rdent injects ClusterDeployment.spec.config over these defaults.
 #
 # Lab-specific defaults mirror the existing BML manifests so the chart renders

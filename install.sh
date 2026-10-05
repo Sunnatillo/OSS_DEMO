@@ -58,9 +58,9 @@ publish_charts() {
   local out="/tmp/byo-charts"
   mkdir -p "${out}"
   helm package "${SCRIPTDIR}/charts/capm3-provider" \
-    "${SCRIPTDIR}/charts/capm3-standalone-cp" -d "${out}"
+    "${SCRIPTDIR}/charts/metal3-cluster" -d "${out}"
   helm push "${out}/capm3-provider-0.1.0.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
-  helm push "${out}/capm3-standalone-cp-0.1.2.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
+  helm push "${out}/metal3-cluster-0.1.2.tgz" "oci://${REGISTRY_HOST}/k0rdent-byo" --plain-http
 }
 
 register_templates() {
@@ -68,7 +68,7 @@ register_templates() {
   sed "s#oci://REGISTRY_HOST/k0rdent-byo#oci://${REGISTRY_HOST}/k0rdent-byo#" \
     "${SCRIPTDIR}/providers/00-helmrepository.yaml" | kubectl apply -f -
   kubectl apply -f "${SCRIPTDIR}/providers/10-providertemplate-metal3.yaml"
-  kubectl apply -f "${SCRIPTDIR}/providers/20-clustertemplate-capm3-standalone-cp.yaml"
+  kubectl apply -f "${SCRIPTDIR}/providers/20-clustertemplate-metal3-cluster.yaml"
 }
 
 add_metal3_provider() {

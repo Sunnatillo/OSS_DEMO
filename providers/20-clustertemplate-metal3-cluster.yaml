@@ -3,12 +3,12 @@
 apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterTemplate
 metadata:
-  name: capm3-standalone-cp-0-1-2
+  name: metal3-cluster-0-1-2
   namespace: kcm-system
 spec:
   helm:
     chartSpec:
-      chart: capm3-standalone-cp
+      chart: metal3-cluster
       version: 0.1.2
       interval: 10m0s
       sourceRef:
