@@ -3,27 +3,11 @@
 #   helm package k0rdent/charts/capm3-provider k0rdent/charts/metal3-cluster
 #   helm push capm3-provider-0.1.0.tgz        oci://192.168.111.1:5000/k0rdent-byo
 #   helm push metal3-cluster-0.1.1.tgz        oci://192.168.111.1:5000/k0rdent-byo
-# Declared in both namespaces: sourceRef cannot cross namespaces, so the
-# ProviderTemplate (kcm-system) and ClusterTemplate (metal3) each need a copy.
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: k0rdent-byo-metal3
   namespace: kcm-system
-  labels:
-    k0rdent.mirantis.com/managed: "true"
-spec:
-  interval: 10m0s
-  provider: generic
-  type: oci
-  insecure: true
-  url: oci://192.168.111.1:5000/k0rdent-byo
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: k0rdent-byo-metal3
-  namespace: metal3
   labels:
     k0rdent.mirantis.com/managed: "true"
 spec:

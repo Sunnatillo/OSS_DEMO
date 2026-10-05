@@ -24,7 +24,7 @@ SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 LOG="/tmp/demo.log"
 BMH_MANIFEST="${BMH_MANIFEST:-${SCRIPTDIR}/deploy/bmhosts.yaml}"
-CLUSTER_NS="metal3"
+CLUSTER_NS="kcm-system"
 
 C_CMD=$'\e[1;36m'   # cyan   - commands "typed" on screen
 C_HDR=$'\e[1;33m'   # yellow - section banners
