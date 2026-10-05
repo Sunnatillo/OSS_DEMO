@@ -7,8 +7,8 @@
 #   - the host bridges + veth from host-setup/02_configure_host.sh
 #   - the NAT/forward rules added for the external subnet egress
 #
-# Unlike host-setup/clean.sh it does NOT stop/remove unrelated containers,
-# minikube, or libvirt networks, so it is safe on a shared/dev machine.
+# It does NOT stop/remove unrelated containers, minikube, or libvirt networks,
+# so it is safe on a shared/dev machine.
 #
 # Usage: ./clean.sh [cluster-name]   # arg (or a preset KIND_CLUSTER_NAME) wins over config.env
 

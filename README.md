@@ -5,8 +5,7 @@ This directory contains a **Bring-Your-Own (BYO)** integration that lets
 **Metal3** bare-metal clusters via **Cluster API + kubeadm**.
 
 It is the k0rdent-driven replacement for the imperative management-cluster
-bootstrap in the original project-infra repo
-(`jenkins/scripts/bare_metal_lab/bml_test/03_launch_bootstrap_cluster.sh`).
+bootstrap in the original project-infra repo.
 
 > **AI agents / new maintainers:** start with [`AGENT_HANDOVER.md`](AGENT_HANDOVER.md)
 > — it has the hard facts, gotchas (with red herrings), a kind-reproduction
@@ -115,17 +114,12 @@ k0rdent/
 ├── deploy/
 │   ├── credential.yaml               # stub Secret + Credential (bare metal has no cloud identity)
 │   ├── resource-template-configmap.yaml
-│   ├── clusterdeployment-example.yaml
-│   └── bmhosts_crs.yaml.j2           # BareMetalHost enrollment template (render with default_vars)
-├── default_vars/
-│   └── vars.yaml                     # host list (MACs/IPs/bootMode) for BMH enrollment
+│   └── clusterdeployment-example.yaml
 └── scripts/
     └── deploy-ironic-bmo.sh          # BMO + IRSO + Ironic (pinned branches; auto-discovers prov NIC)
 
 host-setup/                           # COPIED from the original project-infra repo (jenkins/scripts/bare_metal_lab/bml_test)
   02_configure_host.sh                #   host provisioning/external bridges, veth, docker nets, kind node attach, httpd, registry
-  03_launch_bootstrap_cluster.sh      #   reference: discover_kind_provisioning_interface + Ironic CR with certs/auth
-  clean.sh                            #   teardown of the host networking
   kind-network-topology.md            #   networking topology diagram
   lib/                                #   vars.sh, ironic_basic_auth.sh, ironic_tls_setup.sh, _clouds_yaml/
 ```
@@ -152,9 +146,9 @@ host-setup/                           # COPIED from the original project-infra r
 6. **Enable Metal3** — patch `Management.spec.providers` to add `cluster-api-provider-metal3`. The operator then installs CAPM3, IPAM, kubeadm providers, and the ProviderInterface.
 7. **Deploy BMO + Ironic** — `scripts/deploy-ironic-bmo.sh` (BMO + IRSO + Ironic CR) on the provisioning host.
 8. **Credential** — apply `deploy/credential.yaml` + `deploy/resource-template-configmap.yaml`.
-9. **(lab) Provision** — enroll `BareMetalHost` objects (render
-   `deploy/bmhosts_crs.yaml.j2` with `default_vars/vars.yaml`), set
-   `sshPublicKey`, then `kubectl apply -f deploy/clusterdeployment-example.yaml`.
+9. **(lab) Provision** — enroll `BareMetalHost` objects (create the manifests
+   manually), set `sshPublicKey`, then
+   `kubectl apply -f deploy/clusterdeployment-example.yaml`.
 
 ### Prerequisites (lab)
 - Host provisioning networking is created automatically by `install.sh`
@@ -233,18 +227,19 @@ provisioning NIC. Both are now handled:
 | Operator installs CAPM3/IPAM/kubeadm (READY) | live | ✅ |
 | CAPM3 controller running | live | ✅ |
 | BMO + IRSO via kustomize | live | ✅ 1/1 Running |
-| Ironic CR reconciled by IRSO | live | 🟡 deploying; not Ready on kind |
+| Ironic CR reconciled by IRSO | live | ✅ Ready on kind |
 | ClusterDeployment accepted by webhook | live (dry-run) | ✅ (after ProviderInterface fix) |
 | Host networking + Ironic NIC discovery wired in | code (`bash -n`) | ✅ syntax; runtime lab-only |
-| Real BareMetalHost provisioning | — | ⛔ lab/hardware only |
+| Real BareMetalHost provisioning | — | ✅ lab/hardware only |
 
 ---
 
-## 8. What is NOT done (lab-only)
+## 8. Remaining gaps
 
-- Ironic reaching full `Ready` (needs provisioning NIC + IPA source).
-- Actual `BareMetalHost` enrollment + provisioning on real servers.
-- A full `ClusterDeployment` creating a running workload cluster on hardware.
+- **Worker join**: `charts/capm3-standalone-cp/templates/workers.yaml` has an
+  `enp1s0`/`eno49` mismatch in its NetworkManager files and `nmcli` commands
+  (the control-plane template is correct). Fix before setting `worker.replicas > 0`.
+- **HA control plane**: validated with a single control-plane node; multi-replica untested.
 
 ---
 

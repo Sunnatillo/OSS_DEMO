@@ -61,15 +61,13 @@ k0rdent/
         templates/providers.yaml            → 4 operator provider CRs
         templates/providerinterface.yaml    → REQUIRED ProviderInterface (critical, see §5.1)
   providers/00..30-*.yaml           # Flux HelmRepository, ProviderTemplate, ClusterTemplate, Management patch
-  deploy/                           # stub Credential + ConfigMap + example ClusterDeployment + bmhosts_crs.yaml.j2
-  default_vars/vars.yaml            # bare-metal host inventory (MACs/IPs/bootMode) for BMH enrollment
+  deploy/                           # stub Credential + ConfigMap + example ClusterDeployment
   scripts/deploy-ironic-bmo.sh      # BMO + IRSO + Ironic (pinned branches; auto-discovers prov NIC)
-  host-setup/                       # COPIED from project-infra: host L2 networking (02_configure_host.sh), lib/, clean.sh
+  host-setup/                       # COPIED from project-infra: host L2 networking (02_configure_host.sh), lib/
 ```
 
 The source Metal3 manifests this was ported from live in the project-infra repo:
-`jenkins/scripts/bare_metal_lab/bml_test/manifests/{cluster,controlplane,workers}_centos.yaml`
-and the bootstrap logic in `.../03_launch_bootstrap_cluster.sh`.
+`jenkins/scripts/bare_metal_lab/bml_test/manifests/{cluster,controlplane,workers}_centos.yaml`.
 
 ---
 
@@ -232,7 +230,9 @@ kubectl apply -k /tmp/irso/config/default
 # minimal Ironic CR (stays Init/not-Ready on kind — no provisioning NIC — EXPECTED)
 kubectl -n baremetal-operator-system apply -f - <<EOF
 apiVersion: ironic.metal3.io/v1alpha1
-kind: Ironic
+kind: IronicWhich do you mean? If it's the 03 script, I'll delete it and clean the doc refs. If you really want to drop PROVISION_MACS, tell me how you intend to feed the MACs to Ironic instead, since the active deploy depends on it.
+
+
 metadata: {name: ironic, namespace: baremetal-operator-system}
 spec: {}
 EOF
@@ -245,7 +245,6 @@ EOF
 ```bash
 kind delete cluster --name metal3-mgmt        # dev (cluster only)
 ./clean.sh                                     # scoped: this lab's cluster + docker nets + bridges/veth + its iptables rules
-host-setup/clean.sh                            # legacy BML teardown (host-wide: also stops ALL containers, minikube, libvirt)
 # or KCM only:
 kubectl delete management.k0rdent kcm ; helm uninstall kcm -n kcm-system
 ```
@@ -266,5 +265,4 @@ These are hardcoded to the current BML lab — review before reusing elsewhere:
   `templates/workers.yaml`): interfaces `eno49`/`eno50`/`eno49.3`/`enp1s0`, VLAN
   `3`, control-plane VIP `192.168.111.249`, insecure registry `192.168.111.1:5000`,
   embedded SSH key.
-- **`default_vars/vars.yaml`**: the bare-metal host inventory (MACs, BMC IPs, boot mode).
 - **`deploy/clusterdeployment-example.yaml`**: `sshPublicKey`, pools, VIP, versions.

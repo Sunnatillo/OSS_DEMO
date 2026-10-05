@@ -6,8 +6,7 @@
 # Prerequisites before applying:
 #   - BYO provider + ClusterTemplate registered (k0rdent/providers/*)
 #   - BMO + Ironic deployed (k0rdent/scripts/deploy-ironic-bmo.sh)
-#   - BareMetalHosts enrolled in this namespace (render deploy/bmhosts_crs.yaml.j2
-#     with default_vars/vars.yaml)
+#   - BareMetalHosts enrolled in this namespace (created manually)
 #   - Credential + ConfigMap applied (k0rdent/deploy/credential.yaml, resource-template-configmap.yaml)
 apiVersion: k0rdent.mirantis.com/v1beta1
 kind: ClusterDeployment

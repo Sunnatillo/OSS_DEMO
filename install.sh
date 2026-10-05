@@ -115,8 +115,7 @@ set +x
 cat <<'EOF'
 
 Management cluster ready. Next (lab, with real servers):
-  1. Enroll BareMetalHosts in namespace kcm-system
-     (render k0rdent/deploy/bmhosts_crs.yaml.j2 with k0rdent/default_vars/vars.yaml).
+  1. Enroll BareMetalHosts in namespace kcm-system (create BMH manifests manually).
   2. Set sshPublicKey in k0rdent/deploy/clusterdeployment-example.yaml.
   3. kubectl apply -f k0rdent/deploy/clusterdeployment-example.yaml
   4. Watch: kubectl -n kcm-system get bmh,clusterdeployment -w
