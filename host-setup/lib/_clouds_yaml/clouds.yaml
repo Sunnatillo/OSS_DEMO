@@ -2,8 +2,8 @@ clouds:
   metal3:
     auth_type: http_basic
     auth:
-      username: admin
-      password: admin
+      username: e2f8a668-f25c-436a-b211-a55a9a4abf5f
+      password: 34696f72-4c43-46c6-9bde-1c22eb567c95
     cacert: /etc/openstack/ironic-ca.crt
     baremetal_endpoint_override: https://172.22.0.2:6385
     baremetal_introspection_endpoint_override: https://172.22.0.2:5050

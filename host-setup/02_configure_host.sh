@@ -119,22 +119,29 @@ ensure_bridge_has_ip()
 }
 
 # Ensure an interface is enslaved to the expected bridge.
+# Missing interfaces are skipped: locally (no lab NICs) the bridges simply
+# have no physical uplink, which is fine for everything except real PXE.
 ensure_bridge_member()
 {
     local bridge_name="$1"
     local iface_name="$2"
 
+    if [[ -z "${iface_name}" ]] || ! ip link show "${iface_name}" > /dev/null 2>&1; then
+        echo "WARN: iface '${iface_name:-<none>}' not found; ${bridge_name} has no physical uplink (local test mode)" >&2
+        return 0
+    fi
     if ! ip -o link show "${iface_name}" | grep -q "master ${bridge_name}"; then
         sudo brctl addif "${bridge_name}" "${iface_name}"
     fi
 }
 
-# Resolve and validate the external host interface used by the external bridge.
+# Resolve the external host interface used by the external bridge.
+# Returns empty (handled by ensure_bridge_member) when the lab NIC is absent.
 resolve_external_iface()
 {
     if ! ip link show "${EXTERNAL_IFACE}" > /dev/null 2>&1; then
-        echo "Configured EXTERNAL_IFACE '${EXTERNAL_IFACE}' does not exist" >&2
-        exit 1
+        echo "WARN: EXTERNAL_IFACE '${EXTERNAL_IFACE}' does not exist; skipping uplink" >&2
+        return 0
     fi
 
     sudo ip link set "${EXTERNAL_IFACE}" up
