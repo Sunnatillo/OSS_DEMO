@@ -167,6 +167,16 @@ part3_ironic() {
   hidden kubectl apply -f "${SCRIPTDIR}/deploy/resource-template-configmap.yaml"
   pause "START recording video 2, then press Enter"
   show kubectl -n "${IRONIC_NAMESPACE}" get ironic,pods
+  banner "Management ready. Continue manually (parts 4-5):"
+  cat <<EOF
+  # Enroll BareMetalHosts, then watch them reach 'available':
+  kubectl apply -f ${SCRIPTDIR}/deploy/bmhosts.yaml
+  kubectl -n ${CLUSTER_NS} get bmh -w
+
+  # Provision the child cluster:
+  kubectl apply -f ${SCRIPTDIR}/deploy/clusterdeployment.yaml
+  kubectl -n ${CLUSTER_NS} get clusterdeployment,bmh -w
+EOF
 }
 
 # --- video 2: BMH -> available ----------------------------------------------
@@ -212,5 +222,5 @@ fi
 part1_kcm
 part2_metal3
 part3_ironic
-part4_bmh
-part5_provision
+# Parts 4-5 (BMH enrollment, provisioning) are run manually on camera.
+# The part4_bmh / part5_provision functions above remain as reference.
