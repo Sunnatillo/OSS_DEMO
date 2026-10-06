@@ -4,7 +4,7 @@ description: >-
   BYO k0rdent ClusterTemplate that renders a Metal3 + kubeadm workload cluster
   with a standalone (bare-metal) control plane.
 type: application
-version: 0.1.2
+version: 0.1.1
 appVersion: "1.0.0"
 annotations:
   # k0rdent reads the CAPI providers the rendered cluster relies on from this list.
