@@ -163,7 +163,7 @@ part2_metal3() {
     "${SCRIPTDIR}/charts/metal3-cluster" -d /tmp/byo-charts
   quiet helm push /tmp/byo-charts/capm3-provider-0.1.0.tgz \
     oci://192.168.111.1:5000/k0rdent-byo --plain-http
-  quiet helm push /tmp/byo-charts/metal3-cluster-0.1.1.tgz \
+  quiet helm push /tmp/byo-charts/metal3-cluster-0.1.2.tgz \
     oci://192.168.111.1:5000/k0rdent-byo --plain-http
   echo
   note "Register the Flux source + Metal3 ProviderTemplate + ClusterTemplate with k0rdent."

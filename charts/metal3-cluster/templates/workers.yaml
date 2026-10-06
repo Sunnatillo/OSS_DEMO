@@ -228,9 +228,8 @@ spec:
       - nmcli connection load /etc/NetworkManager/system-connections/enp1s0.3.nmconnection
       - nmcli connection up /etc/NetworkManager/system-connections/enp1s0.3.nmconnection
       - systemctl enable --now crio
-      - sleep 30
+      - bash -c 'for i in $(seq 1 60); do [ -S /var/run/crio/crio.sock ] && exit 0; sleep 1; done; echo "crio socket not ready" >&2; exit 1'
       - systemctl enable --now kubelet
-      - sleep 120
       users:
       - name: metal3
         sshAuthorizedKeys:

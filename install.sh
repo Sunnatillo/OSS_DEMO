@@ -60,7 +60,7 @@ publish_charts() {
   helm package "${SCRIPTDIR}/charts/capm3-provider" \
     "${SCRIPTDIR}/charts/metal3-cluster" -d "${out}"
   helm push "${out}/capm3-provider-0.1.0.tgz" "oci://192.168.111.1:5000/k0rdent-byo" --plain-http
-  helm push "${out}/metal3-cluster-0.1.1.tgz" "oci://192.168.111.1:5000/k0rdent-byo" --plain-http
+  helm push "${out}/metal3-cluster-0.1.2.tgz" "oci://192.168.111.1:5000/k0rdent-byo" --plain-http
 }
 
 register_templates() {

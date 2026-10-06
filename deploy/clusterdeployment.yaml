@@ -14,7 +14,7 @@ metadata:
   name: test1
   namespace: kcm-system
 spec:
-  template: metal3-cluster-0-1-1
+  template: metal3-cluster-0-1-2
   credential: capm3-stub-credential
   dryRun: false
   config:
